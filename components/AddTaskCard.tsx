@@ -7,12 +7,14 @@ interface AddTaskCardProps {
   onSave: (task: Task) => void;
 }
 
+// In AddTaskCard.tsx
 export interface Task {
   id: number;
   name: string;
   dueDate: string | null;
   assignee: string | null;
   priority: string | null;
+  description: string | null; // Add description here
 }
 
 const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
@@ -33,6 +35,7 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
       dueDate,
       assignee,
       priority,
+      description: null,
     };
 
     onSave(newTask);

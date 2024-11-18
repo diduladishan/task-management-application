@@ -10,6 +10,8 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "./ui/input";
 
 const users = ["John Doe", "Jane Smith", "Alice Brown"];
 const priorities = ["Low", "Medium", "High"];
@@ -26,6 +28,7 @@ interface Task {
   dueDate: string | null;
   assignee: string | null;
   priority: string | null;
+  description: string | null; // Add this field
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
@@ -55,6 +58,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
         <p>Due: {task.dueDate}</p>
         <p>Assignee: {task.assignee}</p>
         <p>Priority: {task.priority}</p>
+        <p>{task.description && <span>{task.description}</span>}</p>
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetClose}>
@@ -139,6 +143,20 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={editedTask.description ?? ""}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, description: e.target.value })
+                }
+                className="col-span-3 p-2 border rounded"
+              />
             </div>
           </div>
 

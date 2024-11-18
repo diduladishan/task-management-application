@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -34,6 +34,28 @@ interface Task {
 const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>(task);
+  const [dueDateMessage, setDueDateMessage] = useState<string>("");
+
+  useEffect(() => {
+    if (editedTask.dueDate) {
+      const dueDate = new Date(editedTask.dueDate);
+      const currentDate = new Date();
+      const timeDiff = dueDate.getTime() - currentDate.getTime();
+      const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24)); // Difference in days
+
+      if (dayDiff === 0) {
+        setDueDateMessage("Should complete today");
+      } else if (dayDiff === 1) {
+        setDueDateMessage("Should’ve completed yesterday");
+      } else if (dayDiff < 0) {
+        setDueDateMessage(`Should’ve completed ${Math.abs(dayDiff)} days ago`);
+      } else if (dayDiff === 3) {
+        setDueDateMessage("Should complete within 3 days");
+      } else {
+        setDueDateMessage(`Should complete within ${dayDiff} days`);
+      }
+    }
+  }, [editedTask.dueDate]);
 
   const handleSheetOpen = () => setIsSheetOpen(true);
   const handleSheetClose = () => setIsSheetOpen(false);
@@ -59,6 +81,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
         <p>Assignee: {task.assignee}</p>
         <p>Priority: {task.priority}</p>
         <p>{task.description && <span>{task.description}</span>}</p>
+
+        <p>{dueDateMessage}</p>
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetClose}>

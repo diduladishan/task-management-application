@@ -19,6 +19,9 @@ export default function TasksPage() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [priority, setPriority] = useState<string>("");
+  const [showPriorityList, setShowPriorityList] = useState(false);
+
   const profiles: Profile[] = [
     { image: "/profile-photos/profilePic1.jpg", name: "Ricky Ponting" },
     { image: "/profile-photos/profilePic2.jpg", name: "Devon Conway" },
@@ -28,6 +31,19 @@ export default function TasksPage() {
   ];
 
   const formattedDate = selectedDate ? format(selectedDate, "MMM dd") : "";
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "High":
+        return "#CB2E27";
+      case "Medium":
+        return "#FFAD0D";
+      case "Low":
+        return "#0C6FBF";
+      default:
+        return "black";
+    }
+  };
 
   return (
     <div>
@@ -132,7 +148,45 @@ export default function TasksPage() {
             </div>
           </div>
 
-          <p className="text-black text-[16px]">Set Priority</p>
+          <div className="mt-4">
+            <div
+              className="text-black text-[16px] cursor-pointer"
+              onClick={() => setShowPriorityList(!showPriorityList)}
+            >
+              {!priority ? "Set Priority" : ""}{" "}
+            </div>
+
+            {showPriorityList && (
+              <div className="absolute mt-2 bg-white border border-gray-300 rounded shadow-md w-[200px]">
+                {["Low", "Medium", "High"].map((priorityOption, index) => (
+                  <div
+                    key={index}
+                    className="p-2 cursor-pointer hover:bg-gray-200"
+                    onClick={() => {
+                      setPriority(priorityOption);
+                      setShowPriorityList(false);
+                    }}
+                  >
+                    <p
+                      className="text-[14px]"
+                      style={{ color: getPriorityColor(priorityOption) }}
+                    >
+                      {priorityOption}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {priority && (
+            <p
+              className="text-[16px]"
+              style={{ color: getPriorityColor(priority) }}
+            >
+              {priority}
+            </p>
+          )}
         </div>
       )}
     </div>

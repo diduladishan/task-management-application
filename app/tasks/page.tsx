@@ -1,194 +1,39 @@
 "use client";
-import { useState } from "react";
-import { CgProfile } from "react-icons/cg";
-import { FaCalendar } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
 
-type Profile = {
-  image: string;
-  name: string;
-};
+import React, { useState } from "react";
+import TaskCard from "@/components/TaskCard";
+import AddTaskCard, { Task } from "@/components/AddTaskCard";
 
-export default function TasksPage() {
-  const [showTaskCard, setShowTaskCard] = useState(false);
-  const [taskName, setTaskName] = useState("Write a task name");
-  const [isEditing, setIsEditing] = useState(false);
-  const [showProfileList, setShowProfileList] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [priority, setPriority] = useState<string>("");
-  const [showPriorityList, setShowPriorityList] = useState(false);
+const Home: React.FC = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const profiles: Profile[] = [
-    { image: "/profile-photos/profilePic1.jpg", name: "Ricky Ponting" },
-    { image: "/profile-photos/profilePic2.jpg", name: "Devon Conway" },
-    { image: "/profile-photos/profilePic3.jpg", name: "Steve Smith" },
-    { image: "/profile-photos/profilePic4.jpg", name: "Virat Kohli" },
-    { image: "/profile-photos/profilePic5.jpg", name: "Kusal Mendis" },
-  ];
+  const handleAddTask = () => {
+    setIsAdding(true);
+  };
 
-  const formattedDate = selectedDate ? format(selectedDate, "MMM dd") : "";
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "#CB2E27";
-      case "Medium":
-        return "#FFAD0D";
-      case "Low":
-        return "#0C6FBF";
-      default:
-        return "black";
-    }
+  const handleSaveTask = (task: Task) => {
+    setTasks((prev) => [...prev, task]);
+    setIsAdding(false);
   };
 
   return (
-    <div>
-      <p
-        className="text-black text-[18px] cursor-pointer"
-        onClick={() => setShowTaskCard(!showTaskCard)}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Task Management</h1>
+      <button
+        onClick={handleAddTask}
+        className="bg-green-500 text-white px-4 py-2 rounded"
       >
         Add Task
-      </p>
-
-      {showTaskCard && (
-        <div className="w-[250px] bg-[#4c9e54] p-4 rounded-md mt-4">
-          {isEditing ? (
-            <input
-              type="text"
-              className="text-black text-[16px] mb-5 p-1 border border-gray-300 rounded w-full"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              onBlur={() => setIsEditing(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setIsEditing(false);
-                }
-              }}
-              autoFocus
-            />
-          ) : (
-            <p
-              className="text-black text-[16px] mb-5 cursor-pointer"
-              onClick={() => setIsEditing(true)}
-            >
-              {taskName}
-            </p>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="relative">
-              {selectedProfile ? (
-                <img
-                  src={selectedProfile.image}
-                  alt={selectedProfile.name}
-                  className="w-8 h-8 rounded-full cursor-pointer"
-                  onClick={() => setShowProfileList(!showProfileList)}
-                />
-              ) : (
-                <CgProfile
-                  className="text-[32px] cursor-pointer"
-                  onClick={() => setShowProfileList(!showProfileList)}
-                />
-              )}
-
-              {showProfileList && (
-                <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded shadow-md p-2 w-[200px]">
-                  {profiles.map((profile, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 mb-2 cursor-pointer"
-                      onClick={() => {
-                        setSelectedProfile(profile);
-                        setShowProfileList(false);
-                      }}
-                    >
-                      <img
-                        src={profile.image}
-                        alt={profile.name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <p className="text-black text-[14px]">{profile.name}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              {!selectedDate ? (
-                <FaCalendar
-                  className="text-[32px] cursor-pointer"
-                  onClick={() => setShowDatePicker(!showDatePicker)}
-                />
-              ) : (
-                <p
-                  className="text-black text-[16px] cursor-pointer"
-                  onClick={() => setShowDatePicker(true)}
-                >
-                  {formattedDate}
-                </p>
-              )}
-
-              {showDatePicker && (
-                <div className="absolute top-10 left-0 z-10">
-                  <DatePicker
-                    selected={selectedDate}
-                    onChange={(date: Date | null) => {
-                      setSelectedDate(date);
-                      setShowDatePicker(false);
-                    }}
-                    inline
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div
-              className="text-black text-[16px] cursor-pointer"
-              onClick={() => setShowPriorityList(!showPriorityList)}
-            >
-              {!priority ? "Set Priority" : ""}{" "}
-            </div>
-
-            {showPriorityList && (
-              <div className="absolute mt-2 bg-white border border-gray-300 rounded shadow-md w-[200px]">
-                {["Low", "Medium", "High"].map((priorityOption, index) => (
-                  <div
-                    key={index}
-                    className="p-2 cursor-pointer hover:bg-gray-200"
-                    onClick={() => {
-                      setPriority(priorityOption);
-                      setShowPriorityList(false);
-                    }}
-                  >
-                    <p
-                      className="text-[14px]"
-                      style={{ color: getPriorityColor(priorityOption) }}
-                    >
-                      {priorityOption}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {priority && (
-            <p
-              className="text-[16px]"
-              style={{ color: getPriorityColor(priority) }}
-            >
-              {priority}
-            </p>
-          )}
-        </div>
-      )}
+      </button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} onSave={handleSaveTask} />
+        ))}
+      </div>
+      {isAdding && <AddTaskCard onSave={handleSaveTask} />}
     </div>
   );
-}
+};
+
+export default Home;

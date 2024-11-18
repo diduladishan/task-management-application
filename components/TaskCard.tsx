@@ -17,6 +17,7 @@ const priorities = ["Low", "Medium", "High"];
 interface TaskCardProps {
   task: Task;
   onSave: (task: Task) => void;
+  onDelete: (taskId: number) => void;
 }
 
 interface Task {
@@ -27,11 +28,22 @@ interface Task {
   priority: string | null;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onSave }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editedTask, setEditedTask] = useState<Task>(task);
 
   const handleSheetOpen = () => setIsSheetOpen(true);
   const handleSheetClose = () => setIsSheetOpen(false);
+
+  const handleSaveEdit = () => {
+    onSave(editedTask);
+    handleSheetClose();
+  };
+
+  const handleDelete = () => {
+    onDelete(task.id);
+    handleSheetClose();
+  };
 
   return (
     <div>
@@ -45,7 +57,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave }) => {
         <p>Priority: {task.priority}</p>
       </div>
 
-      {/* Shadcn UI Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={handleSheetClose}>
         <SheetContent>
           <SheetHeader>
@@ -60,42 +71,88 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave }) => {
               <Label htmlFor="name" className="text-right">
                 Task Name
               </Label>
-              <p id="name" className="col-span-3">
-                {task.name}
-              </p>
+              <input
+                id="name"
+                type="text"
+                value={editedTask.name}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, name: e.target.value })
+                }
+                className="col-span-3 p-2 border rounded"
+              />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="dueDate" className="text-right">
                 Due Date
               </Label>
-              <p id="dueDate" className="col-span-3">
-                {task.dueDate}
-              </p>
+              <input
+                id="dueDate"
+                type="date"
+                value={editedTask.dueDate ?? ""}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, dueDate: e.target.value })
+                }
+                className="col-span-3 p-2 border rounded"
+              />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="assignee" className="text-right">
                 Assignee
               </Label>
-              <p id="assignee" className="col-span-3">
-                {task.assignee}
-              </p>
+              <select
+                value={editedTask.assignee ?? ""}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, assignee: e.target.value })
+                }
+                className="col-span-3 p-2 border rounded"
+              >
+                <option value="" disabled>
+                  Select Assignee
+                </option>
+                {users.map((user) => (
+                  <option key={user} value={user}>
+                    {user}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="priority" className="text-right">
                 Priority
               </Label>
-              <p id="priority" className="col-span-3">
-                {task.priority}
-              </p>
+              <select
+                value={editedTask.priority ?? ""}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, priority: e.target.value })
+                }
+                className="col-span-3 p-2 border rounded"
+              >
+                <option value="" disabled>
+                  Select Priority
+                </option>
+                {priorities.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {priority}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <SheetFooter>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
+            <Button
+              onClick={handleDelete}
+              className="ml-2"
+              variant="destructive"
+            >
+              Delete Task
+            </Button>
             <SheetClose asChild>
-              <Button type="submit">Close</Button>
+              <Button className="ml-2">Close</Button>
             </SheetClose>
           </SheetFooter>
         </SheetContent>

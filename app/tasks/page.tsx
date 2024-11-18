@@ -17,6 +17,16 @@ const Home: React.FC = () => {
     setIsAdding(false);
   };
 
+  const handleDeleteTask = (taskId: number) => {
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
+  };
+
+  const handleEditTask = (updatedTask: Task) => {
+    setTasks((prev) =>
+      prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+    );
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Task Management</h1>
@@ -28,7 +38,12 @@ const Home: React.FC = () => {
       </button>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onSave={handleSaveTask} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onSave={handleEditTask}
+            onDelete={handleDeleteTask}
+          />
         ))}
       </div>
       {isAdding && <AddTaskCard onSave={handleSaveTask} />}

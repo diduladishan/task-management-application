@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { CgProfile } from "react-icons/cg";
 import { FaCalendar } from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 type Profile = {
   image: string;
@@ -10,14 +13,12 @@ type Profile = {
 
 export default function TasksPage() {
   const [showTaskCard, setShowTaskCard] = useState(false);
-
   const [taskName, setTaskName] = useState("Write a task name");
   const [isEditing, setIsEditing] = useState(false);
-
   const [showProfileList, setShowProfileList] = useState(false);
-
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const profiles: Profile[] = [
     { image: "/profile-photos/profilePic1.jpg", name: "Ricky Ponting" },
     { image: "/profile-photos/profilePic2.jpg", name: "Devon Conway" },
@@ -25,6 +26,8 @@ export default function TasksPage() {
     { image: "/profile-photos/profilePic4.jpg", name: "Virat Kohli" },
     { image: "/profile-photos/profilePic5.jpg", name: "Kusal Mendis" },
   ];
+
+  const formattedDate = selectedDate ? format(selectedDate, "MMM dd") : "";
 
   return (
     <div>
@@ -98,7 +101,35 @@ export default function TasksPage() {
                 </div>
               )}
             </div>
-            <FaCalendar className="text-[32px]" />
+
+            <div className="relative">
+              {!selectedDate ? (
+                <FaCalendar
+                  className="text-[32px] cursor-pointer"
+                  onClick={() => setShowDatePicker(!showDatePicker)}
+                />
+              ) : (
+                <p
+                  className="text-black text-[16px] cursor-pointer"
+                  onClick={() => setShowDatePicker(true)}
+                >
+                  {formattedDate}
+                </p>
+              )}
+
+              {showDatePicker && (
+                <div className="absolute top-10 left-0 z-10">
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date: Date | null) => {
+                      setSelectedDate(date);
+                      setShowDatePicker(false);
+                    }}
+                    inline
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <p className="text-black text-[16px]">Set Priority</p>

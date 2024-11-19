@@ -5,7 +5,7 @@ import { CgProfile } from "react-icons/cg";
 interface Assignee {
   id: number;
   name: string;
-  avatar: string; // URL to the avatar image
+  avatar: string;
 }
 
 const AssigneeSelector: React.FC = () => {
@@ -16,7 +16,6 @@ const AssigneeSelector: React.FC = () => {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Example list of assignees
   const assignees: Assignee[] = [
     { id: 1, name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
     { id: 2, name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
@@ -28,7 +27,6 @@ const AssigneeSelector: React.FC = () => {
     setIsDropdownOpen(false);
   };
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -47,7 +45,6 @@ const AssigneeSelector: React.FC = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Icon or Selected Avatar */}
       <div
         className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-gray-200"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -63,7 +60,6 @@ const AssigneeSelector: React.FC = () => {
         )}
       </div>
 
-      {/* Dropdown List */}
       {isDropdownOpen && (
         <div className="absolute top-12 left-0 bg-white border border-gray-300 shadow-md rounded-md w-48 z-10">
           {assignees.map((assignee) => (

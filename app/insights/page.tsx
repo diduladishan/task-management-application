@@ -1,5 +1,6 @@
 import AssigneeSelector from "./components/AssigneeSelector";
 import { DatePicker } from "./components/DatePicker";
+import PrioritySelector from "./components/PrioritySelector";
 
 export default function InsightsPage() {
   return (
@@ -9,6 +10,8 @@ export default function InsightsPage() {
 
       <DatePicker />
       <AssigneeSelector />
+
+      <PrioritySelector />
     </div>
   );
 }

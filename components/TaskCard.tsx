@@ -28,7 +28,8 @@ interface Task {
   dueDate: string | null;
   assignee: string | null;
   priority: string | null;
-  description: string | null; // Add this field
+  description: string | null;
+  status: string;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
@@ -41,7 +42,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
       const dueDate = new Date(editedTask.dueDate);
       const currentDate = new Date();
       const timeDiff = dueDate.getTime() - currentDate.getTime();
-      const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24)); // Difference in days
+      const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
 
       if (dayDiff === 0) {
         setDueDateMessage("Should complete today");

@@ -3,6 +3,15 @@ import { toast } from "react-hot-toast";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import AssigneeSelector from "./AssigneeSelector";
+import PrioritySelector from "./PrioritySelector";
+import { DatePicker } from "./DatePicker";
+
+const assignees = [
+  { id: 1, name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
+  { id: 2, name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
+  { id: 3, name: "Alice Smith", avatar: "/profile-photos/profilePic3.jpg" },
+];
 
 interface AddTaskCardProps {
   onSave: (task: Omit<Task, "status">) => void;
@@ -31,6 +40,8 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<Task>({
     resolver: yupResolver(schema) as any,
@@ -57,6 +68,10 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
     reset();
   };
 
+  const selectedAssignee = assignees.find(
+    (assignee) => assignee.id.toString() === watch("assignee")
+  );
+
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       toast.error("Please fill in all the required fields.");
@@ -80,44 +95,33 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
 
         <div>
           <label htmlFor="dueDate">Due Date</label>
-          <input
-            id="dueDate"
-            type="date"
-            {...register("dueDate")}
-            className="w-full p-2 border rounded"
+          <DatePicker
+            register={register}
+            setValue={setValue}
+            name="dueDate" // The field name in the form data
           />
         </div>
 
         <div>
           <label htmlFor="assignee">Assignee</label>
-          <select
-            id="assignee"
-            {...register("assignee")}
-            className="w-full p-2 border rounded"
-          >
-            <option value="" disabled>
-              Select Assignee
-            </option>
-            <option value="John Doe">John Doe</option>
-            <option value="Jane Smith">Jane Smith</option>
-            <option value="Alice Brown">Alice Brown</option>
-          </select>
+          <AssigneeSelector
+            assignees={assignees}
+            value={selectedAssignee || null}
+            onChange={(assignee) =>
+              setValue("assignee", assignee?.id.toString() as any)
+            }
+            name="assignee"
+            register={register}
+          />
         </div>
 
         <div>
           <label htmlFor="priority">Priority</label>
-          <select
-            id="priority"
-            {...register("priority")}
-            className="w-full p-2 border rounded"
-          >
-            <option value="" disabled>
-              Select Priority
-            </option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
+          <PrioritySelector
+            register={register}
+            setValue={setValue}
+            name="priority"
+          />
         </div>
 
         <div>

@@ -49,7 +49,7 @@ const Column: React.FC<ColumnProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold flex items-center">
           <span className={`w-3 h-3 rounded-full bg-${color} mr-2`}></span>
-          {title}
+          {title} ({tasks.length})
         </h2>
         <button className="text-xl font-bold" onClick={handleAddTask}>
           +

@@ -11,16 +11,16 @@ import {
 } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
+import Modal from "./Modal";
 
-const users = ["John Doe", "Jane Smith", "Alice Brown"];
+const users = [
+  { id: "1", name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
+  { id: "2", name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
+  { id: "3", name: "Alice Smith", avatar: "/profile-photos/profilePic3.jpg" },
+];
+
 const priorities = ["Low", "Medium", "High"];
-
-interface TaskCardProps {
-  task: Task;
-  onSave: (task: Task) => void;
-  onDelete: (taskId: number) => void;
-}
 
 interface Task {
   id: number;
@@ -32,10 +32,23 @@ interface Task {
   status: string;
 }
 
+interface TaskCardProps {
+  task: Task;
+  onSave: (task: Task) => void;
+  onDelete: (taskId: number) => void;
+}
+
 const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>(task);
   const [dueDateMessage, setDueDateMessage] = useState<string>("");
+
+  const getAssigneeDetails = (id: string | null) => {
+    return users.find((user) => user.id === id) || null;
+  };
+
+  const assigneeDetails = getAssigneeDetails(task.assignee);
 
   useEffect(() => {
     if (editedTask.dueDate) {
@@ -73,25 +86,43 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
 
   return (
     <div>
+      {/* Task Display */}
       <div
         onClick={handleSheetOpen}
         className="border rounded-lg p-4 bg-white shadow-sm cursor-pointer"
       >
         <h3 className="font-semibold">{task.name}</h3>
-        <p>Due: {task.dueDate}</p>
-        <p>Assignee: {task.assignee}</p>
-        <p>Priority: {task.priority}</p>
-        <p>{task.description && <span>{task.description}</span>}</p>
+        <p>Due: {task.dueDate || "No due date"}</p>
 
+        {/* Display the assignee's avatar and name */}
+        <p className="flex items-center gap-2">
+          Assignee:{" "}
+          {assigneeDetails ? (
+            <>
+              <img
+                src={assigneeDetails.avatar}
+                alt={assigneeDetails.name}
+                className="w-6 h-6 rounded-full"
+              />
+              <span>{assigneeDetails.name}</span>
+            </>
+          ) : (
+            <span className="text-gray-500">Unassigned</span>
+          )}
+        </p>
+
+        <p>Priority: {task.priority || "None"}</p>
+        <p>{task.description && <span>{task.description}</span>}</p>
         <p>{dueDateMessage}</p>
       </div>
 
+      {/* Task Edit Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={handleSheetClose}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Task Details</SheetTitle>
+            <SheetTitle>Edit Task</SheetTitle>
             <SheetDescription>
-              Review or edit the task details below.
+              Update the details of your task below.
             </SheetDescription>
           </SheetHeader>
 
@@ -100,14 +131,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
               <Label htmlFor="name" className="text-right">
                 Task Name
               </Label>
-              <input
+              <Input
                 id="name"
-                type="text"
                 value={editedTask.name}
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, name: e.target.value })
                 }
-                className="col-span-3 p-2 border rounded"
+                className="col-span-3"
               />
             </div>
 
@@ -115,14 +145,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
               <Label htmlFor="dueDate" className="text-right">
                 Due Date
               </Label>
-              <input
+              <Input
                 id="dueDate"
                 type="date"
                 value={editedTask.dueDate ?? ""}
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, dueDate: e.target.value })
                 }
-                className="col-span-3 p-2 border rounded"
+                className="col-span-3"
               />
             </div>
 
@@ -137,12 +167,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
                 }
                 className="col-span-3 p-2 border rounded"
               >
-                <option value="" disabled>
-                  Select Assignee
-                </option>
+                <option value="">Select Assignee</option>
                 {users.map((user) => (
-                  <option key={user} value={user}>
-                    {user}
+                  <option key={user.id} value={user.id}>
+                    {user.name}
                   </option>
                 ))}
               </select>
@@ -159,9 +187,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
                 }
                 className="col-span-3 p-2 border rounded"
               >
-                <option value="" disabled>
-                  Select Priority
-                </option>
+                <option value="">Select Priority</option>
                 {priorities.map((priority) => (
                   <option key={priority} value={priority}>
                     {priority}
@@ -180,7 +206,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, description: e.target.value })
                 }
-                className="col-span-3 p-2 border rounded"
+                className="col-span-3"
               />
             </div>
           </div>
@@ -188,9 +214,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
           <SheetFooter>
             <Button onClick={handleSaveEdit}>Save Changes</Button>
             <Button
-              onClick={handleDelete}
-              className="ml-2"
+              onClick={() => {
+                setOpenModal!(true);
+                setIsSheetOpen(false);
+              }}
               variant="destructive"
+              className="ml-2"
             >
               Delete Task
             </Button>
@@ -200,6 +229,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+      <Modal
+        isOpen={openModal!}
+        handleDelete={handleDelete}
+        setIsOpen={setOpenModal!}
+      />
     </div>
   );
 };

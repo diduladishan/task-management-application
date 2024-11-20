@@ -1,16 +1,25 @@
-import React, { useEffect, useState } from "react";
+"use client";
 import AddTaskCard, { Task } from "@/components/AddTaskCard";
-import TaskCard from "./TaskCard";
+import React, { useState } from "react";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 import toast, { Toaster } from "react-hot-toast";
+import TaskCard from "./TaskCard";
 
 interface ColumnProps {
   title: string;
   color: string;
   status: "todo" | "in-progress" | "completed";
+  tasks: Task[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
-const Column: React.FC<ColumnProps> = ({ title, color, status }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+const Column: React.FC<ColumnProps> = ({
+  title,
+  color,
+  status,
+  tasks,
+  setTasks,
+}) => {
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddTask = () => {
@@ -35,17 +44,6 @@ const Column: React.FC<ColumnProps> = ({ title, color, status }) => {
     toast.success("Task updated successfully!");
   };
 
-  useEffect(() => {
-    const storedTasks = localStorage.getItem(`tasks-${status}`);
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
-    }
-  }, [status]);
-
-  useEffect(() => {
-    localStorage.setItem(`tasks-${status}`, JSON.stringify(tasks));
-  }, [tasks, status]);
-
   return (
     <div className="flex flex-col w-1/3 bg-gray-100 border border-dashed border-gray-300 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -58,20 +56,59 @@ const Column: React.FC<ColumnProps> = ({ title, color, status }) => {
         </button>
       </div>
 
-      <div className="flex-grow">
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onSave={handleEditTask}
-              onDelete={handleDeleteTask}
-            />
-          ))
-        ) : (
-          <div className="text-gray-500 text-center py-4">No tasks</div>
+      <Droppable
+        droppableId={status}
+        isDropDisabled={isAdding}
+        isCombineEnabled={false}
+        ignoreContainerClipping={false}
+      >
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={`flex-grow space-y-2 ${
+              snapshot.isDraggingOver ? "bg-blue-100" : ""
+            }`}
+          >
+            {tasks.length > 0 ? (
+              tasks.map((task, index) => (
+                <Draggable
+                  key={task.id}
+                  draggableId={task.id.toString()}
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        height: snapshot.isDragging
+                          ? `${
+                              snapshot.draggingOver === status
+                                ? "auto"
+                                : "100px"
+                            }`
+                          : "inherit",
+                      }}
+                    >
+                      <TaskCard
+                        task={task}
+                        onSave={handleEditTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))
+            ) : (
+              <div className="text-gray-500 text-center py-4">No tasks</div>
+            )}
+            {provided.placeholder}
+          </div>
         )}
-      </div>
+      </Droppable>
 
       {isAdding && <AddTaskCard onSave={handleSaveTask} />}
       <Toaster />

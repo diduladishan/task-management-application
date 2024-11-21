@@ -8,9 +8,9 @@ import PrioritySelector from "./PrioritySelector";
 import { DatePicker } from "./DatePicker";
 
 const assignees = [
-  { id: 1, name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
-  { id: 2, name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
-  { id: 3, name: "Alice Smith", avatar: "/profile-photos/profilePic3.jpg" },
+  { id: 1, name: "Ricky Ponting", avatar: "/profile-photos/profilePic1.jpg" },
+  { id: 2, name: "Virat Kohli", avatar: "/profile-photos/profilePic6.jpg" },
+  { id: 3, name: "Kusal Mendis", avatar: "/profile-photos/profilePic5.jpg" },
 ];
 
 interface AddTaskCardProps {

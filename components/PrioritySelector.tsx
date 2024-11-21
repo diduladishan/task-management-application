@@ -1,29 +1,17 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
 
-interface Task {
-  id: string;
-  name: string;
-  dueDate: string;
-  assignee: string;
-  priority: string;
-  description: string;
-  status: string;
+interface Props {
+  selectedPriority?: string | null;
+  setSelectedPriority: any;
+  initialValue?: string;
 }
 
-interface PrioritySelectorProps {
-  register: UseFormRegister<Task>;
-  setValue: UseFormSetValue<Task>;
-  name: keyof Task; // This ensures that `name` corresponds to a key in the `Task` type
-}
-
-const PrioritySelector: React.FC<PrioritySelectorProps> = ({
-  register,
-  setValue,
-  name,
-}) => {
-  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
+export default function PrioritySelector({
+  setSelectedPriority,
+  selectedPriority,
+  initialValue,
+}: Props) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,9 +20,13 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({
   const handleSelect = (priority: string) => {
     setSelectedPriority(priority);
     setIsDropdownOpen(false);
-    // Set the selected priority value in the form
-    setValue(name, priority);
   };
+
+  useEffect(() => {
+    if (initialValue) {
+      setSelectedPriority(initialValue);
+    }
+  }, [initialValue]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,15 +56,16 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({
         return "#374151";
     }
   };
-
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className="cursor-pointer text-sm bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300 inline-block"
-        style={{ color: getPriorityColor(selectedPriority) }}
+        className="cursor-pointer text-sm p-3 rounded-md hover:bg-gray-100 inline-block border border-gray-200 w-full"
+        style={{
+          color: getPriorityColor(selectedPriority ?? initialValue ?? ""),
+        }}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
-        {selectedPriority || "Set Priority"}
+        {selectedPriority || initialValue || "Set Priority"}
       </div>
 
       {isDropdownOpen && (
@@ -90,15 +83,6 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({
           ))}
         </div>
       )}
-
-      {/* Registering the component with React Hook Form */}
-      <input
-        type="hidden"
-        {...register(name)} // Register with React Hook Form for the specific key
-        value={selectedPriority || ""}
-      />
     </div>
   );
-};
-
-export default PrioritySelector;
+}

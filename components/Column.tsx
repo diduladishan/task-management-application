@@ -11,6 +11,7 @@ interface ColumnProps {
   status: "todo" | "in-progress" | "completed";
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  icon: React.ReactNode;
 }
 
 const Column: React.FC<ColumnProps> = ({
@@ -18,6 +19,7 @@ const Column: React.FC<ColumnProps> = ({
   color,
   status,
   tasks,
+  icon,
   setTasks,
 }) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -45,11 +47,14 @@ const Column: React.FC<ColumnProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-1/3 bg-gray-100 border border-dashed border-gray-300 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col w-1/3 bg-gray-100 border border-dashed border-gray-300 rounded-lg p-4 overflow-auto">
+      <div className="flex items-center justify-between mb-4 border rounded-lg p-4 bg-white shadow-sm">
         <h2 className="text-lg font-semibold flex items-center">
-          <span className={`w-3 h-3 rounded-full bg-${color} mr-2`}></span>
-          {title} ({tasks.length})
+          <span className={`w-3 h-3 rounded-full ${color} mr-2`}></span>
+          {title}{" "}
+          <span className="text-blue-600 bg-blue-100 bg-opacity-80 rounded-full mt-0.5 ml-3 px-2 text-sm">
+            {tasks.length}
+          </span>
         </h2>
         <button className="text-xl font-bold" onClick={handleAddTask}>
           +
@@ -94,6 +99,7 @@ const Column: React.FC<ColumnProps> = ({
                       }}
                     >
                       <TaskCard
+                        taskIcon={icon}
                         task={task}
                         onSave={handleEditTask}
                         onDelete={handleDeleteTask}

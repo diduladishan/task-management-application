@@ -3,6 +3,8 @@ import { Task } from "@/components/AddTaskCard";
 import Column from "@/components/Column";
 import React, { useEffect, useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon as CheckCircleIconOutline } from "@heroicons/react/24/outline";
 
 const Board: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -57,27 +59,30 @@ const Board: React.FC = () => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex space-x-4 p-6">
+      <div className="flex space-x-4 p-6 h-screen">
         <Column
           title="Todo"
-          color="yellow-500"
+          color="bg-yellow-500"
           status="todo"
           tasks={tasks.filter((task) => task.status === "todo")}
           setTasks={setTasks}
+          icon={<CheckCircleIconOutline className="size-6 text-gray-500" />}
         />
         <Column
           title="In Progress"
-          color="blue-500"
+          color="bg-blue-500"
           status="in-progress"
           tasks={tasks.filter((task) => task.status === "in-progress")}
           setTasks={setTasks}
+          icon={<CheckCircleIconOutline className="size-6 text-gray-500" />}
         />
         <Column
           title="Completed"
-          color="green-500"
+          color="bg-green-500"
           status="completed"
           tasks={tasks.filter((task) => task.status === "completed")}
           setTasks={setTasks}
+          icon={<CheckCircleIcon className="size-6 text-green-500" />}
         />
       </div>
     </DragDropContext>

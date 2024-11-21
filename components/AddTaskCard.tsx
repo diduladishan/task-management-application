@@ -1,6 +1,6 @@
 import * as yup from "yup";
 import { toast } from "react-hot-toast";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AssigneeSelector from "./AssigneeSelector";
@@ -21,7 +21,7 @@ export interface Task {
   id: number;
   name: string;
   dueDate: string | null;
-  assignee: string | null;
+  assignee: number | null | undefined;
   priority: string | null;
   description: string | null;
   status: string;
@@ -31,11 +31,11 @@ const schema = yup.object().shape({
   name: yup.string().required("Task Name is required"),
   dueDate: yup.string().required("Due Date is required"),
   assignee: yup.string().required("Assignee is required"),
-  priority: yup.string().required("Priority is required"),
   description: yup.string().nullable(),
 });
 
 const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -55,12 +55,16 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
   });
 
   const onSubmit = (data: Task) => {
+    if (!selectedPriority) {
+      toast.error("Please fill in all the required fields.");
+      return;
+    }
     const newTask = {
       id: Date.now(),
       name: data.name,
       dueDate: data.dueDate,
       assignee: data.assignee,
-      priority: data.priority,
+      priority: selectedPriority,
       description: data.description,
     };
 
@@ -69,7 +73,7 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
   };
 
   const selectedAssignee = assignees.find(
-    (assignee) => assignee.id.toString() === watch("assignee")
+    (assignee) => assignee.id === watch("assignee")
   );
 
   useEffect(() => {
@@ -83,7 +87,7 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
       <h3 className="text-lg font-semibold mb-4">Add New Task</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="name">Task Name</label>
           <input
             id="name"
@@ -93,16 +97,12 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
           />
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="dueDate">Due Date</label>
-          <DatePicker
-            register={register}
-            setValue={setValue}
-            name="dueDate" // The field name in the form data
-          />
+          <DatePicker register={register} setValue={setValue} name="dueDate" />
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="assignee">Assignee</label>
           <AssigneeSelector
             assignees={assignees}
@@ -115,16 +115,15 @@ const AddTaskCard: React.FC<AddTaskCardProps> = ({ onSave }) => {
           />
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="priority">Priority</label>
           <PrioritySelector
-            register={register}
-            setValue={setValue}
-            name="priority"
+            setSelectedPriority={setSelectedPriority}
+            selectedPriority={selectedPriority}
           />
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="description">Description</label>
           <textarea
             id="description"

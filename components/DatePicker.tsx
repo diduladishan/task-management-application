@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -14,7 +13,7 @@ import {
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 interface DatePickerProps {
-  register: UseFormRegister<any>; // `any` can be replaced with your form data type (e.g., Task)
+  register: UseFormRegister<any>;
   setValue: UseFormSetValue<any>;
   name: string;
 }
@@ -22,10 +21,9 @@ interface DatePickerProps {
 export function DatePicker({ register, setValue, name }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(undefined);
 
-  // Handle date selection and update React Hook Form state
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
-    setValue(name, newDate); // Set the date value in the form
+    setValue(name, newDate);
   };
 
   return (
@@ -34,7 +32,7 @@ export function DatePicker({ register, setValue, name }: DatePickerProps) {
         <Button
           variant={"outline"}
           className={cn(
-            "w-[130px] justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
@@ -50,10 +48,9 @@ export function DatePicker({ register, setValue, name }: DatePickerProps) {
           initialFocus
         />
       </PopoverContent>
-      {/* Register the date picker with React Hook Form */}
       <input
         type="hidden"
-        {...register(name)} // Register with React Hook Form
+        {...register(name)}
         value={date ? format(date, "yyyy-MM-dd") : ""}
       />
     </Popover>

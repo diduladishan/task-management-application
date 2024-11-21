@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { CgProfile } from "react-icons/cg";
 
@@ -12,8 +13,9 @@ interface AssigneeSelectorProps {
   assignees: Assignee[];
   value?: Assignee | null;
   onChange?: (assignee: Assignee | null) => void;
-  name: string;
-  register: any;
+  name?: string;
+  register?: any;
+  className?: string;
 }
 
 const AssigneeSelector: React.FC<AssigneeSelectorProps> = ({
@@ -22,6 +24,7 @@ const AssigneeSelector: React.FC<AssigneeSelectorProps> = ({
   onChange,
   name,
   register,
+  className,
 }) => {
   const [selectedAssignee, setSelectedAssignee] = useState<Assignee | null>(
     value
@@ -53,26 +56,30 @@ const AssigneeSelector: React.FC<AssigneeSelectorProps> = ({
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Hidden input for react-hook-form */}
       <input
         type="hidden"
-        {...register(name)}
+        {...(register ? register(name) : {})}
         value={selectedAssignee?.id || ""}
       />
 
       <div
-        className="flex items-center gap-3 p-2 border rounded-md cursor-pointer bg-gray-100"
+        className="flex w-full items-center gap-3 p-2 border rounded-md cursor-pointer"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         {selectedAssignee ? (
           <>
-            <img
+            <Image
               src={selectedAssignee.avatar}
               alt={selectedAssignee.name}
               className="w-8 h-8 rounded-full"
+              width={32}
+              height={32}
             />
-            <span className="text-sm font-medium">{selectedAssignee.name}</span>
+            <span className="text-sm whitespace-nowrap font-medium">
+              {selectedAssignee.name}
+            </span>
           </>
         ) : (
           <div className="flex items-center gap-2">
@@ -90,10 +97,12 @@ const AssigneeSelector: React.FC<AssigneeSelectorProps> = ({
               className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-100"
               onClick={() => handleSelect(assignee)}
             >
-              <img
+              <Image
                 src={assignee.avatar}
                 alt={assignee.name}
                 className="w-8 h-8 rounded-full"
+                width={32}
+                height={32}
               />
               <span className="text-sm">{assignee.name}</span>
             </div>

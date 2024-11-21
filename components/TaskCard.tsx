@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import dayjs from "dayjs";
+
 import {
   Sheet,
   SheetContent,
@@ -13,11 +15,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import Modal from "./Modal";
+import Image from "next/image";
+import CustomDatePicker from "./CustomDatePicker";
+import AssigneeSelector from "./AssigneeSelector";
+import PrioritySelector from "./PrioritySelector";
 
 const users = [
-  { id: "1", name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
-  { id: "2", name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
-  { id: "3", name: "Alice Smith", avatar: "/profile-photos/profilePic3.jpg" },
+  { id: 1, name: "John Taylor", avatar: "/profile-photos/profilePic1.jpg" },
+  { id: 2, name: "Jane Doe", avatar: "/profile-photos/profilePic2.jpg" },
+  { id: 3, name: "Alice Smith", avatar: "/profile-photos/profilePic3.jpg" },
 ];
 
 const priorities = ["Low", "Medium", "High"];
@@ -26,29 +32,41 @@ interface Task {
   id: number;
   name: string;
   dueDate: string | null;
-  assignee: string | null;
+  assignee: number | null | undefined;
   priority: string | null;
   description: string | null;
   status: string;
 }
 
 interface TaskCardProps {
+  taskIcon: React.ReactNode;
   task: Task;
   onSave: (task: Task) => void;
   onDelete: (taskId: number) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
+const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  onSave,
+  onDelete,
+  taskIcon,
+}) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>(task);
   const [dueDateMessage, setDueDateMessage] = useState<string>("");
 
-  const getAssigneeDetails = (id: string | null) => {
+  const getAssigneeDetails = (id: number) => {
     return users.find((user) => user.id === id) || null;
   };
 
-  const assigneeDetails = getAssigneeDetails(task.assignee);
+  const assigneeDetails = getAssigneeDetails(+task?.assignee!);
+
+  const handlePriorityChange = (priority: string) => {
+    setSelectedPriority(priority);
+    setEditedTask((prev) => ({ ...prev, priority }));
+  };
 
   useEffect(() => {
     if (editedTask.dueDate) {
@@ -86,34 +104,69 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
 
   return (
     <div>
-      {/* Task Display */}
       <div
         onClick={handleSheetOpen}
         className="border rounded-lg p-4 bg-white shadow-sm cursor-pointer"
       >
-        <h3 className="font-semibold">{task.name}</h3>
-        <p>Due: {task.dueDate || "No due date"}</p>
+        <div className="flex gap-2 items-center">
+          {taskIcon}
+          <h3 className="font-semibold text-xl">{task.name}</h3>
+        </div>
+        <hr className="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
 
-        {/* Display the assignee's avatar and name */}
-        <p className="flex items-center gap-2">
-          Assignee:{" "}
-          {assigneeDetails ? (
-            <>
-              <img
-                src={assigneeDetails.avatar}
-                alt={assigneeDetails.name}
-                className="w-6 h-6 rounded-full"
-              />
-              <span>{assigneeDetails.name}</span>
-            </>
-          ) : (
-            <span className="text-gray-500">Unassigned</span>
-          )}
+        <p className="text-gray-600 my-2">
+          {task.description && <span>{task.description}</span>}
         </p>
+        <div className="my-2 mt-4 flex items-center justify-between">
+          <div className="flex gap-4 items-center">
+            {assigneeDetails ? (
+              <>
+                <Image
+                  src={assigneeDetails.avatar}
+                  alt={assigneeDetails.name}
+                  className="w-8 h-8 rounded-full"
+                  width={32}
+                  height={32}
+                />
+              </>
+            ) : (
+              <span className="text-gray-500">Unassigned</span>
+            )}
 
-        <p>Priority: {task.priority || "None"}</p>
-        <p>{task.description && <span>{task.description}</span>}</p>
-        <p>{dueDateMessage}</p>
+            <p className="text-red-600 bg-red-100 rounded py-0.5 px-1 text-xs bg-opacity-30">
+              {dayjs(task.dueDate).format("MMM D") || "No due date"}
+            </p>
+          </div>
+
+          <p
+            className={
+              task.priority === "Low"
+                ? "text-red-600 bg-opacity-30 bg-red-100 rounded py-0.5 px-1 text-xs flex items-center"
+                : task.priority === "Medium"
+                ? "text-yellow-600 bg-yellow-100 bg-opacity-30 rounded py-0.5 px-1 text-xs flex items-center"
+                : "text-blue-600 bg-blue-100 bg-opacity-30 rounded py-0.5 px-1 text-xs flex items-center"
+            }
+          >
+            <span
+              className={
+                `w-2 h-2 rounded-full mr-2 ` +
+                (task.priority === "Low"
+                  ? "bg-red-600"
+                  : task.priority === "Medium"
+                  ? "bg-yellow-600"
+                  : "bg-blue-600")
+              }
+            ></span>
+            {task.priority || "None"}
+          </p>
+        </div>
+        {task.status !== "completed" && (
+          <>
+            <hr className="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
+
+            <p className="text-gray-500 text-sm mt-3">{dueDateMessage}</p>
+          </>
+        )}
       </div>
 
       {/* Task Edit Sheet */}
@@ -145,14 +198,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
               <Label htmlFor="dueDate" className="text-right">
                 Due Date
               </Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={editedTask.dueDate ?? ""}
-                onChange={(e) =>
-                  setEditedTask({ ...editedTask, dueDate: e.target.value })
+              <CustomDatePicker
+                selectedDate={editedTask.dueDate}
+                onSelectDate={(e: string) =>
+                  setEditedTask({ ...editedTask, dueDate: e })
                 }
-                className="col-span-3"
               />
             </div>
 
@@ -160,40 +210,27 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSave, onDelete }) => {
               <Label htmlFor="assignee" className="text-right">
                 Assignee
               </Label>
-              <select
-                value={editedTask.assignee ?? ""}
-                onChange={(e) =>
-                  setEditedTask({ ...editedTask, assignee: e.target.value })
+              <AssigneeSelector
+                assignees={users}
+                value={
+                  task.assignee ? getAssigneeDetails(+task.assignee) : null
                 }
-                className="col-span-3 p-2 border rounded"
-              >
-                <option value="">Select Assignee</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, assignee: e?.id })
+                }
+                className="col-span-3"
+              />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="priority" className="text-right">
                 Priority
               </Label>
-              <select
-                value={editedTask.priority ?? ""}
-                onChange={(e) =>
-                  setEditedTask({ ...editedTask, priority: e.target.value })
-                }
-                className="col-span-3 p-2 border rounded"
-              >
-                <option value="">Select Priority</option>
-                {priorities.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-                ))}
-              </select>
+              <PrioritySelector
+                setSelectedPriority={handlePriorityChange}
+                selectedPriority={selectedPriority}
+                initialValue={task.priority!}
+              />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
